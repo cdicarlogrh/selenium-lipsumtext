@@ -1,8 +1,8 @@
 Selenium.prototype.doLipsumText = function (options, varName) {
-    var length = 5, type = "word", useHtmlTags = false, useWordCaps = false, useMarks = true, opts = options.split("|"), i = 0;
+    var length = 5, type = "word", useHtmlTags = false, useWordCaps = false, useMarks = true, useTitle = true, useFullName = false, opts = options.split("|"), i = 0;
     for (i = 0; i < opts.length; i += 1) {
         if (opts[i]) {
-            var countAndType = opts[i].match(/^(\d+) ?(word|paragraph)s?$/);
+            var countAndType = opts[i].match(/^(\d+) ?(word|paragraph|physician)s?$/);
             if (countAndType) {
                 length = countAndType[1];
                 type = countAndType[2];
@@ -20,6 +20,14 @@ Selenium.prototype.doLipsumText = function (options, varName) {
         if (opts[i] && opts[i].match(/^(nomarks)$/)) {
             useMarks = false;
         }
+		
+		if(opts[i] && opts[i].match(/^(notitle)$/)) {
+			useTitle = false;
+		}
+		
+		if(opts[i] && opts[i].match(/^(fullname)$/)) {
+			useFullName = true;
+		}
     }
 
     switch (type) {
@@ -29,6 +37,9 @@ Selenium.prototype.doLipsumText = function (options, varName) {
     case "word":
         storedVars[varName] = lipsumWords(length, useWordCaps, useMarks);
         break;
+	case "physician":
+		storedVars[varName] = lipsumPhysician(useFullName, useTitle);
+		break;
     default:
         storedVars[varName] = lipsumWords(length, useWordCaps, useMarks);
     }
@@ -60,6 +71,55 @@ function lipsumParagraphs(length, useHtmlTags, useWordCaps, useMarks) {
 function lipsumWords(length, useWordCaps, useMarks) {
     // Return an exact number of words
     return getWords(length, length, useWordCaps, useMarks);
+}
+
+/* 
+ Returns a string formatted as a name
+
+ @author Christopher Di Carlo of http://grandriverhospital.on.ca
+*/
+function lipsumPhysician(useFullName, useTitle) {
+	var b = true, lastName = "", firstName = "", retval = "";
+	
+	while(b) {
+		var n = getWords(1, 1, true, false);
+		
+		if(n.length >= 3) {
+			b = true;
+			lastName = n.replace(/(^[ ])/, "");
+		} else {
+			b = false;
+		}
+	}
+
+	b = true;
+	
+	if(useFullName === true) {
+		while(b) {
+			var n = getWords(1, 1, true, false);
+			
+			if(n.length >= 3) {
+				b = true;
+				firstName = n.replace(/(^[ ])/, "");
+			} else {
+				b = false;
+			}
+		}
+		
+		if(useTitle === true) {
+			retval = "Dr. " + firstName + " " + lastName;
+		} else {
+			retval = firstName + " " + lastName;
+		}
+	} else {
+		if(useTitle === true) {
+			retval = "Dr. " + lastName;
+		} else {
+			retval = lastName;
+		}
+	}
+	
+	return retval;
 }
 
 /*
