@@ -56,9 +56,9 @@ function lipsumParagraphs(length, useHtmlTags, useWordCaps, useMarks) {
         }
 
         if (useHtmlTags === true) {
-            output += "<p>" + getWords(15, 300, useWordCaps, useMarks) + "</p>";
+            output += "<p>" + getWords(15, 300, useWordCaps, useMarks,  null) + "</p>";
         } else {
-            output += getWords(15, 300, useWordCaps, useMarks);
+            output += getWords(15, 300, useWordCaps, useMarks, null);
         }
     }
 
@@ -70,7 +70,7 @@ function lipsumParagraphs(length, useHtmlTags, useWordCaps, useMarks) {
 */
 function lipsumWords(length, useWordCaps, useMarks) {
     // Return an exact number of words
-    return getWords(length, length, useWordCaps, useMarks);
+    return getWords(length, length, useWordCaps, useMarks, null);
 }
 
 /* 
@@ -79,47 +79,19 @@ function lipsumWords(length, useWordCaps, useMarks) {
  @author Christopher Di Carlo of http://grandriverhospital.on.ca
 */
 function lipsumPhysician(useFullName, useTitle) {
-	var b = true, lastName = "", firstName = "", retval = "";
-	
-	while(b) {
-		var n = getWords(1, 1, true, false);
-		
-		if(n.length >= 3) {
-			b = true;
-			lastName = n.replace(/(^[ ])/, "");
-		} else {
-			b = false;
-		}
-	}
-
-	b = true;
+	var n = "";
 	
 	if(useFullName === true) {
-		while(b) {
-			var n = getWords(1, 1, true, false);
-			
-			if(n.length >= 3) {
-				b = true;
-				firstName = n.replace(/(^[ ])/, "");
-			} else {
-				b = false;
-			}
-		}
-		
-		if(useTitle === true) {
-			retval = "Dr. " + firstName + " " + lastName;
-		} else {
-			retval = firstName + " " + lastName;
-		}
+		n = getWords(2, 2, true, false, 3);
 	} else {
-		if(useTitle === true) {
-			retval = "Dr. " + lastName;
-		} else {
-			retval = lastName;
-		}
+		n = getWords(1, 1, true, false, 3);
 	}
 	
-	return retval;
+	if(useTitle === true) {
+		return "Dr. " + n;
+	} else {
+		return n;
+	}
 }
 
 /*
@@ -128,7 +100,7 @@ function lipsumPhysician(useFullName, useTitle) {
  @author C. Peter Chen (wrote original script at http://dev-notes.com/code.php?q=37)
  @author Adam Courtemanche of http://agileadam.com (modified code for use in Selenium lipsumtext extension)
 */
-function getWords(minWordCount, maxWordCount, useWordCaps, useMarks) {
+function getWords(minWordCount, maxWordCount, useWordCaps, useMarks, minLength) {
     var loremIpsumWordBank = new Array("lorem","ipsum","dolor","sit","amet,","consectetur","adipisicing","elit,","sed","do","eiusmod","tempor","incididunt","ut","labore","et","dolore","magna","aliqua.","enim","ad","minim","veniam,","quis","nostrud","exercitation","ullamco","laboris","nisi","ut","aliquip","ex","ea","commodo","consequat.","duis","aute","irure","dolor","in","reprehenderit","in","voluptate","velit","esse","cillum","dolore","eu","fugiat","nulla","pariatur.","excepteur","sint","occaecat","cupidatat","non","proident,","sunt","in","culpa","qui","officia","deserunt","mollit","anim","id","est","laborum.","sed","ut","perspiciatis,","unde","omnis","iste","natus","error","sit","voluptatem","accusantium","doloremque","laudantium,","totam","rem","aperiam","eaque","ipsa,","quae","ab","illo","inventore","veritatis","et","quasi","architecto","beatae","vitae","dicta","sunt,","explicabo.","nemo","enim","ipsam","voluptatem,","quia","voluptas","sit,","aspernatur","aut","odit","aut","fugit,","sed","quia","consequuntur","magni","dolores","eos,","qui","ratione","voluptatem","sequi","nesciunt,","neque","porro","quisquam","est,","qui","dolorem","ipsum,","quia","dolor","sit,","amet,","consectetur,","adipisci","velit,","sed","quia","non","numquam","eius","modi","tempora","incidunt,","ut","labore","et","dolore","magnam","aliquam","quaerat","voluptatem.","ut","enim","ad","minima","veniam,","quis","nostrum","exercitationem","ullam","corporis","suscipit","laboriosam,","nisi","ut","aliquid","ex","ea","commodi","consequatur?","quis","autem","vel","eum","iure","reprehenderit,","qui","in","ea","voluptate","velit","esse,","quam","nihil","molestiae","consequatur,","vel","illum,","qui","dolorem","eum","fugiat,","quo","voluptas","nulla","pariatur?","at","vero","eos","et","accusamus","et","iusto","odio","dignissimos","ducimus,","qui","blanditiis","praesentium","voluptatum","deleniti","atque","corrupti,","quos","dolores","et","quas","molestias","excepturi","sint,","obcaecati","cupiditate","non","provident,","similique","sunt","in","culpa,","qui","officia","deserunt","mollitia","animi,","id","est","laborum","et","dolorum","fuga.","harum","quidem","rerum","facilis","est","et","expedita","distinctio.","Nam","libero","tempore,","cum","soluta","nobis","est","eligendi","optio,","cumque","nihil","impedit,","quo","minus","id,","quod","maxime","placeat,","facere","possimus,","omnis","voluptas","assumenda","est,","omnis","dolor","repellendus.","temporibus","autem","quibusdam","aut","officiis","debitis","aut","rerum","necessitatibus","saepe","eveniet,","ut","et","voluptates","repudiandae","sint","molestiae","non","recusandae.","itaque","earum","rerum","hic","tenetur","a","sapiente","delectus,","aut","reiciendis","voluptatibus","maiores","alias","consequatur","aut","perferendis","doloribus","asperiores","repellat");
 
     // By default, use the minWordCount as the number of words. If min and max are different,
@@ -141,18 +113,36 @@ function getWords(minWordCount, maxWordCount, useWordCaps, useMarks) {
     var ret = "", i = 0;
     for (i = 0; i < numWords; i += 1) {
         var newTxt = loremIpsumWordBank[Math.floor(Math.random() * (loremIpsumWordBank.length - 1))];
-        if (useMarks) {
-            if (ret.substring(ret.length - 1, ret.length) === "." || ret.substring(ret.length - 1, ret.length) === "?") {
-                newTxt = newTxt.capitalizeFirstLetter();
-            }
-        }
+		
+		if(minLength != null) {
+			if(newTxt.length >= minLength) {
+				if (useMarks) {
+					if (ret.substring(ret.length - 1, ret.length) === "." || ret.substring(ret.length - 1, ret.length) === "?") {
+						newTxt = newTxt.capitalizeFirstLetter();
+					}
+				}
+				
+				if (useWordCaps) {
+					newTxt = newTxt.capitalizeFirstLetter();
+				}
+				ret += " " + newTxt;
+			} else {
+				i--;
+			}
+		} else {
+			if (useMarks) {
+				if (ret.substring(ret.length - 1, ret.length) === "." || ret.substring(ret.length - 1, ret.length) === "?") {
+					newTxt = newTxt.capitalizeFirstLetter();
+				}
+			}
 
-        if (useWordCaps) {
-            newTxt = newTxt.capitalizeFirstLetter();
-        }
+			if (useWordCaps) {
+				newTxt = newTxt.capitalizeFirstLetter();
+			}
 
-        ret += " " + newTxt;
-    }
+			ret += " " + newTxt;
+		}
+	}
 
     // Remove beginning space
     ret = ret.replace(/(^[ ])/, "");
